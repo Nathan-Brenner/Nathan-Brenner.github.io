@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Automating Year-End Tax Data with Azure AI Document Intelligence | Nathan Brenner</title>
+<meta name="description" content="Nathan Brenner explains a practical workflow for extracting year-end tax data with Azure AI Document Intelligence, custom models, validation, and human review.">
+<link rel="canonical" href="https://nathan-brenner.github.io/azure-document-intelligence-tax-workflow.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="From Manual Entry to a Reviewed Tax Data Workflow">
+<meta property="og:description" content="A practical guide to Azure AI Document Intelligence, custom extraction models, and year-end data quality.">
+<meta property="og:url" content="https://nathan-brenner.github.io/azure-document-intelligence-tax-workflow.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Automating Year-End Tax Data with Azure AI Document Intelligence","datePublished":"2026-11-11","dateModified":"2026-11-11","author":{"@type":"Person","name":"Nathan Brenner","alternateName":"Nate Brenner","url":"https://nathan-brenner.github.io/","sameAs":["https://www.linkedin.com/in/nate-brenner/"]},"mainEntityOfPage":"https://nathan-brenner.github.io/azure-document-intelligence-tax-workflow.html"}</script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f4ed;color:#243b35;font:18px/1.8 system-ui,sans-serif}header,main,footer{max-width:900px;margin:auto;padding:26px 28px}header{border-bottom:1px solid #ccd3c9;display:flex;justify-content:space-between;gap:20px}a{color:#305e4b;text-underline-offset:4px}header a{font-size:15px}.brand{font-weight:800;text-decoration:none}article{padding:35px 0}h1,h2{font-family:Georgia,serif;font-weight:400;line-height:1.15}h1{font-size:clamp(38px,6vw,64px);letter-spacing:-2px;margin:22px 0}h2{font-size:32px;margin:48px 0 18px}.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#647c68}.dek{font-size:22px;color:#53665e}.byline{font-size:14px;color:#647c68}.callout{background:#e4eadf;border-left:4px solid #647c68;padding:20px 24px;margin:30px 0}.workflow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;list-style:none;padding:0}.workflow li{padding:18px;background:#e4eadf;font-size:15px}.workflow strong{display:block;font-size:18px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:16px}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #ccd3c9;padding:12px}th{background:#e4eadf}footer{border-top:1px solid #ccd3c9;font-size:14px}.sources{font-size:15px}li{margin-bottom:10px}code{font-size:.9em}a:focus-visible{outline:3px solid #647c68;outline-offset:4px}@media(max-width:600px){.workflow{grid-template-columns:1fr}header,main,footer{padding:20px}h1{letter-spacing:-1px}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="/">Nathan (Nate) Brenner</a><a href="/#articles">All articles</a></header>
+<main><article>
+<p class="eyebrow">Data operations · Practical automation</p>
+<h1>Automating Year-End Tax Data with Azure AI Document Intelligence</h1>
+<p class="dek">How to move from retyping PDFs to a structured workflow with custom models, validation, and an accountable review process.</p>
+<p class="byline">By <a href="https://www.linkedin.com/in/nate-brenner/" rel="author">Nathan Brenner</a> · November 11, 2026 · 7 minute read</p>
+<p>Year-end reporting can turn a folder of PDFs into a substantial data-entry project. Someone opens each document, finds the right fields, types them into a spreadsheet, checks the numbers, and repeats. Corrected forms and missing attachments make that process harder to track.</p>
+<p>I would approach this as a data-quality workflow: capture the document once, extract a candidate record, apply explicit checks, and move only approved data into the reporting system. Azure AI Document Intelligence supplies the extraction step. The surrounding workflow makes the results useful.</p>
+<div class="callout"><strong>A quick naming clarification:</strong> Azure AI Document Intelligence was formerly called Form Recognizer. It is separate from Microsoft Forms, the survey and questionnaire application. This article describes a proposed implementation pattern, not a claim about a particular employer's deployment or measured results.</div>
+<h2>1. Define the record before training the model</h2>
+<p>Start with the destination. Which fields does the year-end reporting process actually need? For a partnership tax package, that might mean the tax year, entity identifier, partner identifier, document type, selected income or loss amounts, distributions, and separately stated credit codes and amounts.</p>
+<p>Write a field dictionary that specifies data types, allowed values, required fields, and source locations. Keep a blank value distinct from zero. Preserve codes beside their amounts; a number without its category is not a reliable reporting record. Record whether a document is original, corrected, or amended when that information is available.</p>
+<div class="table-wrap"><table><thead><tr><th>Record component</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>Tax year and entity/partner keys</td><td>Route the record to the correct reporting period and account.</td></tr>
+<tr><td>Field code, raw text, normalized value</td><td>Preserve meaning while preparing data for a loader.</td></tr>
+<tr><td>Document ID and page reference</td><td>Let a reviewer trace an amount to its source.</td></tr>
+<tr><td>Model version and review status</td><td>Explain how the record was produced and approved.</td></tr>
+</tbody></table></div>
+<h2>2. Choose prebuilt extraction or a custom model</h2>
+<p>Microsoft provides prebuilt models for selected US tax forms, including supported W-2, 1098, 1099, and 1040 formats. Check the exact form and version coverage before choosing one. Do not assume every form in a mixed tax package is supported. <a href="#source-tax">[1]</a></p>
+<p>For a Schedule K-1, Form 8825, Schedule K, or a supplemental statement outside the available prebuilt coverage, evaluate a custom extraction model. In Document Intelligence Studio, connect an Azure Storage dataset, define the fields, label representative documents, and train the model. Custom neural models can accommodate layout variation; template models rely on a more consistent visual layout. <a href="#source-custom">[2]</a></p>
+<p>Use authorized, appropriately protected samples. Include different issuers, scan quality, multi-page tables, negative amounts, and relevant tax-year layouts. Keep a separate test set that the model has never trained on. Microsoft permits starting custom extraction with five examples, but that is a starting requirement—not evidence that a model is ready for production. <a href="#source-custom">[2]</a></p>
+<h2>3. Build the workflow around the model</h2>
+<p>One possible Azure design uses a private Blob Storage intake area, a queue, and an Azure Function or Logic Apps workflow to coordinate analysis and downstream processing. These are architecture choices, not an automatic end-to-end feature of the extraction model.</p>
+<ol class="workflow">
+<li><strong>01 · Receive</strong>Assign a document ID, retain the original, and check for duplicates.</li>
+<li><strong>02 · Route</strong>Identify the form type and separate mixed packages where needed.</li>
+<li><strong>03 · Extract</strong>Call the selected model, wait for analysis to complete, and retain its output.</li>
+<li><strong>04 · Validate</strong>Normalize values and run field and business-rule checks.</li>
+<li><strong>05 · Review</strong>Send exceptions to a reviewer with the source page available.</li>
+<li><strong>06 · Export</strong>Send approved records to a staging table, CSV, or supported loader.</li>
+</ol>
+<p>Use a persistent status record such as Received, Analyzing, Needs Review, Approved, Exported, or Failed. Add retry limits and an exception queue for technical failures. Give each export a stable identifier so rerunning a failed job does not silently create duplicate records.</p>
+<h2>4. Validate meaning, not just recognition</h2>
+<p>OCR can recognize an amount correctly and still attach it to the wrong field. I would check the tax year against the reporting batch, match identifiers to an approved reference list, and distinguish parentheses indicating negative amounts from punctuation. Reconcile totals only where the document's definitions support that relationship.</p>
+<p>Keep prior-year comparisons as review signals rather than automatic corrections. A large change may be legitimate. Likewise, a corrected document should trigger a controlled replacement decision; it should not simply become another row beside the original.</p>
+<p>Use field confidence to help prioritize review, but do not treat it as proof of correctness or a universal accuracy percentage. Set acceptance rules using held-out examples and the consequences of an error. Missing required fields, conflicting identifiers, or failed checks should require review even when extraction confidence is high. Microsoft explicitly describes confidence-based routing and human review for critical workflows. <a href="#source-confidence">[3]</a></p>
+<h2>5. Make the review screen useful</h2>
+<p>A reviewer should see the source page next to the extracted values, the reason a record was flagged, and the proposed destination. Capture the original extraction, the correction, the reviewer, and the approval time. Those details turn an exception queue into an auditable process.</p>
+<p>Store recurring error examples for later model improvement. Human corrections do not automatically retrain the extraction model: update the labeled training set, build a new version, and test it against the same benchmark before release.</p>
+<h2>6. Protect the documents and control the handoff</h2>
+<p>Tax packages contain sensitive identifiers and financial information. In this design, restrict access to intake, training, and review storage; avoid placing document contents or full identifiers in routine application logs; and define retention rules. Keep secrets out of source code and use managed identities where supported. Microsoft documents managed identity access for Document Intelligence and Azure Storage. <a href="#source-security">[4]</a></p>
+<p>If the reporting database is read-only, export through an approved loader rather than attempting direct updates. Validate the loader's required columns and formats, then reconcile accepted, rejected, and pending records back to the intake count. Extraction prepares source data; it does not make tax-treatment decisions.</p>
+<h2>7. Measure the work that remains</h2>
+<p>For a pilot, choose one document type and one reporting batch. Compare the proposed workflow with manual entry using field-level accuracy, minutes of review per document, exception rate, duplicate rate, and successful exports. Include service and review costs rather than reporting extraction speed alone.</p>
+<p>The result to aim for is a shorter, more traceable route from source document to approved reporting data. Keep people focused on ambiguous records and reconciliation, while automation handles the repeatable movement and preparation of information.</p>
+<section class="sources" aria-label="Sources"><h2>Microsoft documentation</h2><ol>
+<li id="source-tax"><a href="https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/prebuilt/tax-document?view=doc-intel-4.0.0">US tax document models and supported forms</a></li>
+<li id="source-custom"><a href="https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-custom?view=doc-intel-4.0.0">Custom document models</a></li>
+<li id="source-confidence"><a href="https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept/accuracy-confidence?view=doc-intel-4.0.0">Interpreting accuracy and confidence scores</a></li>
+<li id="source-security"><a href="https://learn.microsoft.com/azure/ai-services/document-intelligence/authentication/managed-identities?view=doc-intel-4.0.0">Managed identities for Document Intelligence</a></li>
+</ol><p>Documentation reviewed November 11, 2026. Model coverage and service capabilities can change.</p></section>
+</article></main>
+<footer><p><strong>Nathan (Nate) Brenner</strong> · Atlanta · Data quality, financial systems, and practical technology.</p><p><a href="/">Back to the blog</a> · <a href="https://www.linkedin.com/in/nate-brenner/">LinkedIn</a></p></footer>
+</body></html>
