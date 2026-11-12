@@ -35,7 +35,9 @@ jobs:
 
           base = "https://nathan-brenner.github.io/"
           ns = "http://www.sitemaps.org/schemas/sitemap/0.9"
+          image_ns = "http://www.google.com/schemas/sitemap-image/1.1"
           ET.register_namespace("", ns)
+          ET.register_namespace("image", image_ns)
 
           if not Path("index.html").is_file():
               raise SystemExit("index.html is missing from the repository root")
@@ -59,6 +61,21 @@ jobs:
               node = ET.SubElement(sitemap, f"{{{ns}}}url")
               loc = ET.SubElement(node, f"{{{ns}}}loc")
               loc.text = base if page == Path("index.html") else base + quote(page.as_posix(), safe="/")
+              # Index locally hosted images used on each page.
+              html = page.read_text(encoding="utf-8")
+              found = set()
+              for src in re.findall(r'<img[^>]+src="([^"]+)"', html, re.I):
+                  src = src.split("?", 1)[0].split("#", 1)[0]
+                  if src.startswith(("data:", "http:", "https:", "//")):
+                      continue
+                  image_path = (page.parent / src.lstrip("/")).as_posix() if not src.startswith("/") else src.lstrip("/")
+                  if image_path in found or not Path(image_path).is_file():
+                      continue
+                  if Path(image_path).suffix.lower() not in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"}:
+                      continue
+                  found.add(image_path)
+                  image_node = ET.SubElement(node, f"{{{image_ns}}}image")
+                  ET.SubElement(image_node, f"{{{image_ns}}}loc").text = base + quote(image_path, safe="/")
 
           ET.indent(sitemap, space="  ")
           Path("sitemap.xml").write_bytes(
