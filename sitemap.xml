@@ -1,7 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://nathan-brenner.github.io/</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-professional-portrait.webp</image:loc></image:image>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-garden-portrait.webp</image:loc></image:image>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ocean-sunset.webp</image:loc></image:image>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-atlanta-baseball-day.webp</image:loc></image:image>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-beach-day.webp</image:loc></image:image>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-basketball-game.webp</image:loc></image:image>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-las-vegas.webp</image:loc></image:image>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-art-gallery.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/azure-document-intelligence-tax-workflow.html</loc>
@@ -20,24 +28,31 @@
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/nathan-brenner-art-gallery-photo.html</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-art-gallery.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/nathan-brenner-atlanta-baseball-day-photo.html</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-atlanta-baseball-day.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/nathan-brenner-basketball-game-photo.html</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-basketball-game.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/nathan-brenner-beach-day-photo.html</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-beach-day.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/nathan-brenner-garden-portrait-photo.html</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-garden-portrait.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/nathan-brenner-las-vegas-photo.html</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-las-vegas.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/nathan-brenner-ocean-sunset-photo.html</loc>
+    <image:image><image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ocean-sunset.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://nathan-brenner.github.io/quality-assurance-financial-data.html</loc>
