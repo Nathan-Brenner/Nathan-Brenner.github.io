@@ -87,4 +87,25 @@
   <url>
     <loc>https://nathan-brenner.github.io/quality-assurance-financial-data.html</loc>
   </url>
+  <url>
+    <loc>https://nathan-brenner.github.io/ramsey-whippet.html</loc>
+    <image:image>
+      <image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ramsey-whippet-you-are-loved-mural.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ramsey-whippet-hiking-overlook.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ramsey-whippet-backyard-selfie.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ramsey-whippet-beach-family-walk.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ramsey-whippet-beach-play.webp</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://nathan-brenner.github.io/images/nathan-brenner-ramsey-whippet-holiday-antlers.webp</image:loc>
+    </image:image>
+  </url>
 </urlset>
